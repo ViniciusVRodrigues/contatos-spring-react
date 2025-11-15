@@ -2,6 +2,7 @@ package com.contatos.api.service;
 
 import com.contatos.api.dto.ContatoRequest;
 import com.contatos.api.dto.ContatoResponse;
+import com.contatos.api.dto.GoogleGeocodingResponse;
 import com.contatos.api.exception.BusinessException;
 import com.contatos.api.exception.ResourceNotFoundException;
 import com.contatos.api.model.Contato;
@@ -22,6 +23,7 @@ public class ContatoService {
 
     private final ContatoRepository contatoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final GoogleMapsService googleMapsService;
 
     private Usuario getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -69,6 +71,27 @@ public class ContatoService {
             throw new BusinessException("CPF já cadastrado");
         }
 
+        // Se latitude/longitude não foram fornecidas ou são zero, busca do Google Maps
+        Double latitude = request.getLatitude();
+        Double longitude = request.getLongitude();
+        
+        if ((latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0)) {
+            try {
+                var location = googleMapsService.getCoordinates(
+                    request.getLogradouro(), 
+                    request.getNumero(),
+                    request.getBairro(), 
+                    request.getCidade(), 
+                    request.getEstado(), 
+                    request.getCep()
+                );
+                latitude = location.getLat();
+                longitude = location.getLng();
+            } catch (Exception e) {
+                throw new BusinessException("Não foi possível obter coordenadas para o endereço fornecido. Configure a chave da API do Google Maps ou forneça as coordenadas manualmente.");
+            }
+        }
+
         Contato contato = Contato.builder()
                 .nome(request.getNome())
                 .cpf(request.getCpf())
@@ -80,8 +103,8 @@ public class ContatoService {
                 .bairro(request.getBairro())
                 .cidade(request.getCidade())
                 .estado(request.getEstado())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
+                .latitude(latitude)
+                .longitude(longitude)
                 .usuario(usuario)
                 .build();
 
@@ -107,6 +130,27 @@ public class ContatoService {
             throw new BusinessException("CPF já cadastrado");
         }
 
+        // Se latitude/longitude não foram fornecidas ou são zero, busca do Google Maps
+        Double latitude = request.getLatitude();
+        Double longitude = request.getLongitude();
+        
+        if ((latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0)) {
+            try {
+                var location = googleMapsService.getCoordinates(
+                    request.getLogradouro(), 
+                    request.getNumero(),
+                    request.getBairro(), 
+                    request.getCidade(), 
+                    request.getEstado(), 
+                    request.getCep()
+                );
+                latitude = location.getLat();
+                longitude = location.getLng();
+            } catch (Exception e) {
+                throw new BusinessException("Não foi possível obter coordenadas para o endereço fornecido. Configure a chave da API do Google Maps ou forneça as coordenadas manualmente.");
+            }
+        }
+
         contato.setNome(request.getNome());
         contato.setCpf(request.getCpf());
         contato.setTelefone(request.getTelefone());
@@ -117,8 +161,8 @@ public class ContatoService {
         contato.setBairro(request.getBairro());
         contato.setCidade(request.getCidade());
         contato.setEstado(request.getEstado());
-        contato.setLatitude(request.getLatitude());
-        contato.setLongitude(request.getLongitude());
+        contato.setLatitude(latitude);
+        contato.setLongitude(longitude);
 
         contato = contatoRepository.save(contato);
         return toResponse(contato);

@@ -47,9 +47,7 @@ public class ContatoRequest {
     @Size(min = 2, max = 2, message = "Estado deve ter 2 caracteres")
     private String estado;
 
-    @NotNull(message = "Latitude é obrigatória")
     private Double latitude;
 
-    @NotNull(message = "Longitude é obrigatória")
     private Double longitude;
 }
