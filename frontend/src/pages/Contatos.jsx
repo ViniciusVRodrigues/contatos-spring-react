@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Button,
+  IconButton,
   TextField,
-  Grid,
+  Drawer,
   InputAdornment,
-  Paper,
   Alert,
+  Fab,
+  Toolbar,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -17,6 +18,8 @@ import { contatosAPI } from '../services/api';
 import ContatosList from '../components/ContatosList';
 import ContatoForm from '../components/ContatoForm';
 import ContatoMap from '../components/ContatoMap';
+
+const drawerWidth = 400;
 
 export default function Contatos() {
   const [contatos, setContatos] = useState([]);
@@ -94,31 +97,37 @@ export default function Contatos() {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Meus Contatos
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddContato}
-        >
-          Novo Contato
-        </Button>
-      </Box>
+    <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
+      {/* Side Menu com lista de contatos */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            position: 'relative',
+            height: '100%',
+          },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h5" component="h1" gutterBottom>
+            Meus Contatos
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mb: 2 }}>
+          {/* Search bar with + button */}
+          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <TextField
               fullWidth
+              size="small"
               placeholder="Buscar por nome ou CPF..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -130,7 +139,16 @@ export default function Contatos() {
                 ),
               }}
             />
-          </Paper>
+            <Fab
+              color="success"
+              size="small"
+              onClick={handleAddContato}
+              sx={{ minWidth: 40, width: 40, height: 40 }}
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
+
           <ContatosList
             contatos={contatos}
             loading={loading}
@@ -142,15 +160,25 @@ export default function Contatos() {
             totalPages={totalPages}
             onPageChange={setPage}
           />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <ContatoMap 
-            contatos={contatos} 
-            selectedContato={selectedContato}
-            onContatoSelect={handleContatoClick}
-          />
-        </Grid>
-      </Grid>
+        </Box>
+      </Drawer>
+
+      {/* Main content area with map */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          height: '100%',
+          overflow: 'auto',
+        }}
+      >
+        <ContatoMap 
+          contatos={contatos} 
+          selectedContato={selectedContato}
+          onContatoSelect={handleContatoClick}
+        />
+      </Box>
 
       <ContatoForm
         open={showForm}
