@@ -17,6 +17,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service responsible for managing contacts (CRUD operations)
+ * 
+ * This service implements the core business rules for contacts:
+ * - CPF validation using the official Brazilian algorithm
+ * - CPF uniqueness per user (same CPF cannot be registered twice by the same user)
+ * - Automatic geocoding via Google Maps API when coordinates are not provided
+ * - Access control ensuring users can only manage their own contacts
+ * - Pagination and search functionality
+ * 
+ * @see ContatoRepository
+ * @see GoogleMapsService
+ * @see CpfValidator
+ */
 @Service
 @RequiredArgsConstructor
 public class ContatoService {
@@ -25,18 +39,37 @@ public class ContatoService {
     private final UsuarioRepository usuarioRepository;
     private final GoogleMapsService googleMapsService;
 
+    /**
+     * Retrieves the currently authenticated user from Spring Security context
+     * 
+     * @return the authenticated Usuario entity
+     * @throws BusinessException if user is not found in database
+     */
     private Usuario getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
     }
 
+    /**
+     * Lists all contacts for the current authenticated user with optional search and pagination
+     * 
+     * Business Rules:
+     * - Only returns contacts owned by the authenticated user
+     * - Search works on both name (case-insensitive) and CPF fields
+     * - Supports pagination, sorting via Pageable parameter
+     * 
+     * @param search optional search term to filter by name or CPF
+     * @param pageable pagination and sorting parameters
+     * @return paginated list of contacts matching the criteria
+     */
     @Transactional(readOnly = true)
     public Page<ContatoResponse> listContatos(String search, Pageable pageable) {
         Usuario usuario = getCurrentUser();
         Page<Contato> contatos;
 
         if (search != null && !search.isBlank()) {
+            // Search in both nome and CPF fields
             contatos = contatoRepository.findByUsuarioIdAndNomeContainingIgnoreCaseOrUsuarioIdAndCpfContaining(
                     usuario.getId(), search, usuario.getId(), search, pageable);
         } else {
@@ -46,12 +79,25 @@ public class ContatoService {
         return contatos.map(this::toResponse);
     }
 
+    /**
+     * Retrieves a specific contact by ID
+     * 
+     * Business Rules:
+     * - User can only access their own contacts (ownership validation)
+     * - Throws exception if contact doesn't exist or belongs to another user
+     * 
+     * @param id the contact ID
+     * @return the contact data
+     * @throws ResourceNotFoundException if contact doesn't exist
+     * @throws BusinessException if user doesn't own the contact
+     */
     @Transactional(readOnly = true)
     public ContatoResponse getContato(Long id) {
         Usuario usuario = getCurrentUser();
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado"));
 
+        // Access control: verify ownership
         if (!contato.getUsuario().getId().equals(usuario.getId())) {
             throw new BusinessException("Acesso negado");
         }
@@ -59,19 +105,34 @@ public class ContatoService {
         return toResponse(contato);
     }
 
+    /**
+     * Creates a new contact for the authenticated user
+     * 
+     * Business Rules:
+     * - CPF must be valid according to Brazilian algorithm (CpfValidator)
+     * - CPF must be unique per user (duplicate check)
+     * - If latitude/longitude not provided or zero, automatically fetches from Google Maps API
+     * - All address fields are required for geocoding
+     * 
+     * @param request contact creation data
+     * @return created contact with generated ID and coordinates
+     * @throws BusinessException if CPF is invalid, already registered, or geocoding fails
+     */
     @Transactional
     public ContatoResponse createContato(ContatoRequest request) {
         Usuario usuario = getCurrentUser();
 
+        // Validate CPF using official Brazilian algorithm
         if (!CpfValidator.isValid(request.getCpf())) {
             throw new BusinessException("CPF inválido");
         }
 
+        // Check CPF uniqueness per user
         if (contatoRepository.existsByUsuarioIdAndCpf(usuario.getId(), request.getCpf())) {
             throw new BusinessException("CPF já cadastrado");
         }
 
-        // Se latitude/longitude não foram fornecidas ou são zero, busca do Google Maps
+        // Automatic geocoding: fetch coordinates from Google Maps if not provided
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();
         
@@ -112,25 +173,43 @@ public class ContatoService {
         return toResponse(contato);
     }
 
+    /**
+     * Updates an existing contact
+     * 
+     * Business Rules:
+     * - User can only update their own contacts
+     * - CPF must remain valid
+     * - CPF must remain unique per user (excluding the contact being updated)
+     * - If address fields changed, automatically recalculates coordinates via Google Maps
+     * 
+     * @param id contact ID to update
+     * @param request new contact data
+     * @return updated contact
+     * @throws ResourceNotFoundException if contact doesn't exist
+     * @throws BusinessException if validation fails or user doesn't own the contact
+     */
     @Transactional
     public ContatoResponse updateContato(Long id, ContatoRequest request) {
         Usuario usuario = getCurrentUser();
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado"));
 
+        // Access control: verify ownership
         if (!contato.getUsuario().getId().equals(usuario.getId())) {
             throw new BusinessException("Acesso negado");
         }
 
+        // Validate CPF
         if (!CpfValidator.isValid(request.getCpf())) {
             throw new BusinessException("CPF inválido");
         }
 
+        // Check CPF uniqueness (excluding current contact)
         if (contatoRepository.existsByUsuarioIdAndCpfAndIdNot(usuario.getId(), request.getCpf(), id)) {
             throw new BusinessException("CPF já cadastrado");
         }
 
-        // Verifica se o endereço mudou para recalcular as coordenadas
+        // Check if address changed to recalculate coordinates
         boolean enderecoMudou = !contato.getLogradouro().equals(request.getLogradouro()) ||
                                 !contato.getNumero().equals(request.getNumero()) ||
                                 !contato.getBairro().equals(request.getBairro()) ||
@@ -138,7 +217,7 @@ public class ContatoService {
                                 !contato.getEstado().equals(request.getEstado()) ||
                                 !contato.getCep().equals(request.getCep());
 
-        // Se latitude/longitude não foram fornecidas, são zero, ou o endereço mudou, busca do Google Maps
+        // Recalculate coordinates if address changed or coordinates not provided
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();
         
@@ -176,12 +255,24 @@ public class ContatoService {
         return toResponse(contato);
     }
 
+    /**
+     * Deletes a contact permanently
+     * 
+     * Business Rules:
+     * - User can only delete their own contacts
+     * - Deletion is permanent (no soft delete)
+     * 
+     * @param id contact ID to delete
+     * @throws ResourceNotFoundException if contact doesn't exist
+     * @throws BusinessException if user doesn't own the contact
+     */
     @Transactional
     public void deleteContato(Long id) {
         Usuario usuario = getCurrentUser();
         Contato contato = contatoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado"));
 
+        // Access control: verify ownership
         if (!contato.getUsuario().getId().equals(usuario.getId())) {
             throw new BusinessException("Acesso negado");
         }
@@ -189,6 +280,13 @@ public class ContatoService {
         contatoRepository.delete(contato);
     }
 
+    /**
+     * Converts a Contato entity to a ContatoResponse DTO
+     * Utility method to separate domain model from API response
+     * 
+     * @param contato the entity to convert
+     * @return DTO with contact data
+     */
     private ContatoResponse toResponse(Contato contato) {
         return ContatoResponse.builder()
                 .id(contato.getId())
