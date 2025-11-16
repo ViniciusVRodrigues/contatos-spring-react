@@ -15,7 +15,6 @@ public class GoogleMapsService {
     @Value("${google.maps.api.key:}")
     private String apiKey;
 
-    private static final String GEOCODING_API_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private final RestClient restClient = RestClient.create();
 
     public GoogleGeocodingResponse.Location getCoordinates(String address) {

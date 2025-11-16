@@ -259,7 +259,7 @@ Este projeto foi desenvolvido como teste técnico para desenvolvedor Fullstack J
 
 ## 👥 Autor
 
-Desenvolvido por [Vinicius Rodrigues](https://github.com/ViniciusVRodrigues)
+Desenvolvido por [Vinicius Veiga Rodrigues](https://github.com/ViniciusVRodrigues)
 
 ## 🤝 Contribuindo
 
