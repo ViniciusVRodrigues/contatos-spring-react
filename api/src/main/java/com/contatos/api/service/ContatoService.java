@@ -130,11 +130,19 @@ public class ContatoService {
             throw new BusinessException("CPF já cadastrado");
         }
 
-        // Se latitude/longitude não foram fornecidas ou são zero, busca do Google Maps
+        // Verifica se o endereço mudou para recalcular as coordenadas
+        boolean enderecoMudou = !contato.getLogradouro().equals(request.getLogradouro()) ||
+                                !contato.getNumero().equals(request.getNumero()) ||
+                                !contato.getBairro().equals(request.getBairro()) ||
+                                !contato.getCidade().equals(request.getCidade()) ||
+                                !contato.getEstado().equals(request.getEstado()) ||
+                                !contato.getCep().equals(request.getCep());
+
+        // Se latitude/longitude não foram fornecidas, são zero, ou o endereço mudou, busca do Google Maps
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();
         
-        if ((latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0)) {
+        if ((latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0) || enderecoMudou) {
             try {
                 var location = googleMapsService.getCoordinates(
                     request.getLogradouro(), 

@@ -64,17 +64,17 @@ export default function ContatosList({
                 <ListItemText
                   primary={contato.nome}
                   secondary={
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
+                    <Box component="span" sx={{ display: 'block' }}>
+                      <Box component="span" sx={{ display: 'block' }}>
                         CPF: {formatarCPF(contato.cpf)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      </Box>
+                      <Box component="span" sx={{ display: 'block' }}>
                         <PhoneIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
                         {formatarTelefone(contato.telefone)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      </Box>
+                      <Box component="span" sx={{ display: 'block' }}>
                         {contato.cidade}/{contato.estado}
-                      </Typography>
+                      </Box>
                     </Box>
                   }
                 />
