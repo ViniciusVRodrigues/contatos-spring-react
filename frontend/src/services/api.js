@@ -22,6 +22,7 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
   register: (data) => api.post('/auth/registro', data),
   login: (data) => api.post('/auth/login', data),
+  verificarEmail: (email) => api.get('/auth/verificar-email', { params: { email } }),
 };
 
 // Contatos API

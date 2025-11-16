@@ -264,14 +264,13 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
     <Dialog 
       open={open} 
       onClose={(event, reason) => {
-        // Only close on button click, not on backdrop click or escape
-        if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
+        // Only close on button click or ESC, not on backdrop click
+        if (reason !== 'backdropClick') {
           onClose();
         }
       }} 
       maxWidth="md" 
       fullWidth
-      disableEscapeKeyDown
     >
       <DialogTitle>
         {contato ? 'Editar Contato' : 'Novo Contato'}
