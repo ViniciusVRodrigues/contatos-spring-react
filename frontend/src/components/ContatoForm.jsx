@@ -11,6 +11,9 @@ import {
   Alert,
   CircularProgress,
   Box,
+  Autocomplete,
+  Paper,
+  Typography,
 } from '@mui/material';
 import { contatosAPI, enderecosAPI } from '../services/api';
 import { validarCPF } from '../utils/validators';
@@ -40,10 +43,14 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [error, setError] = useState('');
+  const [logradouroSuggestions, setLogradouroSuggestions] = useState([]);
+  const [logradouroLoading, setLogradouroLoading] = useState(false);
+  const [logradouroInputValue, setLogradouroInputValue] = useState('');
 
   useEffect(() => {
     if (contato) {
       setFormData(contato);
+      setLogradouroInputValue(contato.logradouro || '');
     } else {
       setFormData({
         nome: '',
@@ -59,16 +66,58 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
         latitude: 0,
         longitude: 0,
       });
+      setLogradouroInputValue('');
     }
     setErrors({});
     setError('');
+    setLogradouroSuggestions([]);
   }, [contato, open]);
+
+  // Fetch address suggestions when typing logradouro
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (logradouroInputValue.length >= 3 && formData.estado && formData.cidade) {
+        setLogradouroLoading(true);
+        try {
+          const response = await enderecosAPI.buscarEnderecos(
+            formData.estado,
+            formData.cidade,
+            logradouroInputValue
+          );
+          setLogradouroSuggestions(response.data || []);
+        } catch (err) {
+          console.error('Erro ao buscar sugestões:', err);
+          setLogradouroSuggestions([]);
+        } finally {
+          setLogradouroLoading(false);
+        }
+      } else {
+        setLogradouroSuggestions([]);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 500);
+    return () => clearTimeout(timeoutId);
+  }, [logradouroInputValue, formData.estado, formData.cidade]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleLogradouroSelect = (event, value) => {
+    if (value) {
+      // value is an address object from ViaCEP
+      setFormData(prev => ({
+        ...prev,
+        logradouro: value.logradouro,
+        cep: value.cep.replace('-', ''),
+        bairro: value.bairro || prev.bairro,
+      }));
+      setLogradouroInputValue(value.logradouro);
     }
   };
 
@@ -86,6 +135,7 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
           cidade: data.localidade || prev.cidade,
           estado: data.uf || prev.estado,
         }));
+        setLogradouroInputValue(data.logradouro || prev.logradouro);
       } catch (err) {
         console.error('Erro ao buscar CEP:', err);
       } finally {
@@ -211,16 +261,87 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
                 inputProps={{ maxLength: 9 }}
               />
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
-                label="Logradouro"
-                name="logradouro"
-                value={formData.logradouro}
+                label="Cidade"
+                name="cidade"
+                value={formData.cidade}
                 onChange={handleChange}
-                error={!!errors.logradouro}
-                helperText={errors.logradouro}
+                error={!!errors.cidade}
+                helperText={errors.cidade}
                 required
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                select
+                label="UF"
+                name="estado"
+                value={formData.estado}
+                onChange={handleChange}
+                error={!!errors.estado}
+                helperText={errors.estado}
+                required
+              >
+                {estados.map((uf) => (
+                  <MenuItem key={uf} value={uf}>
+                    {uf}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <Autocomplete
+                freeSolo
+                options={logradouroSuggestions}
+                getOptionLabel={(option) => 
+                  typeof option === 'string' ? option : option.logradouro || ''
+                }
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <Box>
+                      <Typography variant="body1">{option.logradouro}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.bairro} - CEP: {option.cep}
+                      </Typography>
+                    </Box>
+                  </li>
+                )}
+                inputValue={logradouroInputValue}
+                onInputChange={(event, newInputValue) => {
+                  setLogradouroInputValue(newInputValue);
+                  if (event?.type === 'change') {
+                    setFormData(prev => ({ ...prev, logradouro: newInputValue }));
+                  }
+                }}
+                onChange={handleLogradouroSelect}
+                loading={logradouroLoading}
+                disabled={!formData.estado || !formData.cidade}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Logradouro"
+                    error={!!errors.logradouro}
+                    helperText={
+                      errors.logradouro || 
+                      (!formData.estado || !formData.cidade 
+                        ? 'Preencha UF e Cidade primeiro' 
+                        : 'Digite 3 ou mais letras para sugestões')
+                    }
+                    required
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {logradouroLoading ? <CircularProgress size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -235,7 +356,7 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Complemento"
@@ -255,37 +376,6 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
                 helperText={errors.bairro}
                 required
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Cidade"
-                name="cidade"
-                value={formData.cidade}
-                onChange={handleChange}
-                error={!!errors.cidade}
-                helperText={errors.cidade}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={2}>
-              <TextField
-                fullWidth
-                select
-                label="UF"
-                name="estado"
-                value={formData.estado}
-                onChange={handleChange}
-                error={!!errors.estado}
-                helperText={errors.estado}
-                required
-              >
-                {estados.map((uf) => (
-                  <MenuItem key={uf} value={uf}>
-                    {uf}
-                  </MenuItem>
-                ))}
-              </TextField>
             </Grid>
           </Grid>
         </DialogContent>

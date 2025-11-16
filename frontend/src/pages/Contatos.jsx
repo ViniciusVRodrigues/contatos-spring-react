@@ -144,7 +144,11 @@ export default function Contatos() {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <ContatoMap contato={selectedContato} />
+          <ContatoMap 
+            contatos={contatos} 
+            selectedContato={selectedContato}
+            onContatoSelect={handleContatoClick}
+          />
         </Grid>
       </Grid>
 
