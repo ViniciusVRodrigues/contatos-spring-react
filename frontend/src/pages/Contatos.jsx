@@ -97,7 +97,7 @@ export default function Contatos() {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
+    <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)', width: '100vw', left: 0, top: 64, position: 'absolute' }}>
       {/* Side Menu com lista de contatos */}
       <Drawer
         variant="permanent"
@@ -168,7 +168,7 @@ export default function Contatos() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          width: `calc(100% - ${drawerWidth}px)`,
           height: '100%',
           overflow: 'auto',
         }}
