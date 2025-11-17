@@ -67,7 +67,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua das Flores")
+                .logradouro("Rua José Loureiro")
                 .numero("123")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -97,7 +97,7 @@ class ContatoServiceTest {
                 .cpf("12345678901") // Invalid CPF
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua das Flores")
+                .logradouro("Rua José Loureiro")
                 .numero("123")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -120,7 +120,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua das Flores")
+                .logradouro("Rua José Loureiro")
                 .numero("123")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -136,9 +136,9 @@ class ContatoServiceTest {
                 .cpf("12345678909") // Same CPF
                 .telefone("41988776655")
                 .cep("80020000")
-                .logradouro("Av. Principal")
+                .logradouro("Rua Voluntários da Pátria")
                 .numero("456")
-                .bairro("Batel")
+                .bairro("Centro")
                 .cidade("Curitiba")
                 .estado("PR")
                 .latitude(-25.4284)
@@ -163,7 +163,7 @@ class ContatoServiceTest {
                     .cpf(generateValidCpf(i))
                     .telefone("4199988776" + i)
                     .cep("80010000")
-                    .logradouro("Rua " + i)
+                    .logradouro("Rua José Loureiro")
                     .numero(String.valueOf(i))
                     .bairro("Centro")
                     .cidade("Curitiba")
@@ -194,7 +194,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua A")
+                .logradouro("Rua José Loureiro")
                 .numero("100")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -208,7 +208,7 @@ class ContatoServiceTest {
                 .cpf("11144477735")
                 .telefone("41988776655")
                 .cep("80020000")
-                .logradouro("Rua B")
+                .logradouro("Rua Voluntários da Pátria")
                 .numero("200")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -244,7 +244,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua das Palmeiras")
+                .logradouro("Rua José Loureiro")
                 .numero("789")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -281,7 +281,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua Original")
+                .logradouro("Rua José Loureiro")
                 .numero("100")
                 .bairro("Centro")
                 .cidade("Curitiba")
@@ -297,9 +297,9 @@ class ContatoServiceTest {
                 .cpf("12345678909") // Same CPF
                 .telefone("41988776655") // Different phone
                 .cep("80020000")
-                .logradouro("Rua Atualizada")
+                .logradouro("Rua Voluntários da Pátria")
                 .numero("200")
-                .bairro("Batel")
+                .bairro("Centro")
                 .cidade("Curitiba")
                 .estado("PR")
                 .latitude(-25.4300)
@@ -312,7 +312,7 @@ class ContatoServiceTest {
         assertEquals(created.getId(), updated.getId());
         assertEquals("Updated Name", updated.getNome());
         assertEquals("41988776655", updated.getTelefone());
-        assertEquals("Rua Atualizada", updated.getLogradouro());
+        assertEquals("Rua Voluntários da Pátria", updated.getLogradouro());
     }
 
     /**
@@ -326,7 +326,7 @@ class ContatoServiceTest {
                 .cpf("12345678909")
                 .telefone("41999887766")
                 .cep("80010000")
-                .logradouro("Rua Temporária")
+                .logradouro("Rua José Loureiro")
                 .numero("999")
                 .bairro("Centro")
                 .cidade("Curitiba")
