@@ -1,144 +1,66 @@
-# Frontend - Sistema de Gerenciamento de Contatos
+# Frontend - Gerenciamento de Contatos
 
-Frontend em React com Material-UI (Material Design v3) para o sistema de gerenciamento de contatos.
+Interface React com Material-UI para gerenciamento de contatos com integração ViaCEP e Google Maps.
 
 ## 🚀 Tecnologias
 
-- **React 18** - Biblioteca JavaScript para construção de interfaces
-- **Material-UI (MUI) v5** - Componentes que implementam Material Design v3
-- **React Router** - Navegação entre páginas
-- **Axios** - Cliente HTTP para comunicação com a API
-- **Vite** - Build tool e dev server
-- **Google Maps React** - Integração com Google Maps
+- React 18
+- Material-UI v5
+- React Router v6
+- Axios
+- Vite
+- Google Maps API
 
-## 📋 Funcionalidades
+## ⚙️ Configuração
 
-- ✅ Autenticação (Login e Registro)
-- ✅ Listagem de contatos com paginação
-- ✅ Busca por nome ou CPF
-- ✅ Cadastro de novos contatos
-- ✅ Edição de contatos existentes
-- ✅ Exclusão de contatos
-- ✅ Integração com ViaCEP para busca de endereço
-- ✅ Validação de CPF (algoritmo oficial)
-- ✅ Visualização de contatos no Google Maps
-- ✅ Interface responsiva com Material Design v3
-
-## 🔧 Configuração
-
-### 1. Instalar dependências
+### 1. Instale as dependências
 
 ```bash
 npm install
 ```
 
-### 2. Configurar variáveis de ambiente
+### 2. Configure o ambiente
 
-Crie um arquivo `.env` na raiz do projeto frontend:
+Copie `.env.example` para `.env`:
 
-```env
-VITE_GOOGLE_MAPS_API_KEY=sua-chave-da-api-do-google-maps
+```bash
+cp .env.example .env
 ```
 
-> **Nota**: A chave do Google Maps é opcional. Se não configurada, o mapa não será exibido, mas o resto da aplicação funcionará normalmente.
+> **Nota**: A chave do Google Maps é opcional. Sem ela, o mapa não será exibido, mas o restante funciona normalmente.
 
-### 3. Executar em modo de desenvolvimento
+### 3. Execute
 
 ```bash
 npm run dev
 ```
 
-A aplicação estará disponível em: `http://localhost:3000`
+Acesse: `http://localhost:3000`
 
-### 4. Build para produção
+## 🔧 Build
 
 ```bash
 npm run build
 ```
 
-Os arquivos de produção estarão na pasta `dist/`.
+Os arquivos de produção estarão em `dist/`.
 
-## 🏗 Estrutura do Projeto
+## 📋 Funcionalidades
 
-```
-frontend/
-├── src/
-│   ├── components/          # Componentes reutilizáveis
-│   │   ├── Layout.jsx       # Layout com AppBar e navegação
-│   │   ├── ContatosList.jsx # Lista de contatos
-│   │   ├── ContatoForm.jsx  # Formulário de contato
-│   │   └── ContatoMap.jsx   # Mapa com Google Maps
-│   ├── pages/               # Páginas da aplicação
-│   │   ├── Login.jsx        # Página de login
-│   │   ├── Register.jsx     # Página de registro
-│   │   └── Contatos.jsx     # Página principal de contatos
-│   ├── services/            # Serviços e API
-│   │   └── api.js           # Cliente Axios e endpoints
-│   ├── contexts/            # Contexts do React
-│   │   └── AuthContext.jsx  # Context de autenticação
-│   ├── utils/               # Utilitários
-│   │   └── validators.js    # Validações e formatações
-│   ├── App.jsx              # Componente principal
-│   ├── main.jsx             # Entry point
-│   └── theme.js             # Tema Material-UI
-├── index.html
-├── vite.config.js
-└── package.json
-```
+- Autenticação (Login/Registro)
+- CRUD de contatos com paginação
+- Busca por nome ou CPF
+- Integração ViaCEP
+- Validação de CPF
+- Visualização no Google Maps
+- Interface responsiva
 
-## 🔐 Integração com o Backend
+## 🔐 Backend
 
-O frontend se comunica com a API backend através dos seguintes endpoints:
+A aplicação se conecta à API em `http://localhost:8080/api` (configurado via proxy no Vite).
 
-- **Base URL**: `http://localhost:8080/api`
-- **Autenticação**: JWT Token via header `Authorization: Bearer {token}`
+Certifique-se de que o backend está rodando antes de iniciar o frontend.
 
-### Endpoints utilizados:
+## 👤 Autor
 
-- `POST /auth/registro` - Registrar novo usuário
-- `POST /auth/login` - Fazer login
-- `GET /contatos` - Listar contatos (com paginação e busca)
-- `GET /contatos/{id}` - Buscar contato específico
-- `POST /contatos` - Criar novo contato
-- `PUT /contatos/{id}` - Atualizar contato
-- `DELETE /contatos/{id}` - Excluir contato
-- `GET /enderecos/cep/{cep}` - Buscar endereço por CEP
-
-## 🎨 Material Design v3
-
-A interface segue as diretrizes do Material Design v3:
-
-- **Cores primárias e secundárias** definidas no tema
-- **Tipografia** Roboto
-- **Componentes** com elevação e sombras apropriadas
-- **Feedback visual** em interações
-- **Design responsivo** para mobile e desktop
-
-## 📱 Responsividade
-
-A aplicação é totalmente responsiva e se adapta a diferentes tamanhos de tela:
-
-- **Desktop**: Layout com duas colunas (lista e mapa lado a lado)
-- **Mobile**: Layout em coluna única com navegação otimizada
-
-## 🧪 Validações
-
-- **CPF**: Validação usando algoritmo oficial brasileiro
-- **Email**: Validação de formato
-- **Senha**: Mínimo de 6 caracteres
-- **Campos obrigatórios**: Validação em todos os campos necessários
-
-## 🗺 Google Maps
-
-O mapa exibe a localização do contato selecionado:
-
-- Marcador na posição do contato
-- Zoom automático na localização
-- Informações do endereço no cabeçalho
-
-## 📝 Notas
-
-- O proxy do Vite redireciona requisições `/api` para `http://localhost:8080`
-- Certifique-se de que o backend está rodando na porta 8080
-- O token JWT é armazenado no localStorage
-- Logout limpa o token e redireciona para login
+Desenvolvido por [Vinicius Veiga Rodrigues](https://github.com/ViniciusVRodrigues)
