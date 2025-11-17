@@ -221,7 +221,10 @@ public class ContatoService {
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();
         
-        if ((latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0) || enderecoMudou) {
+        // Only fetch coordinates if they're not provided or are zero
+        boolean needsCoordinates = (latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0);
+        
+        if (needsCoordinates && enderecoMudou) {
             try {
                 var location = googleMapsService.getCoordinates(
                     request.getLogradouro(), 
@@ -305,5 +308,27 @@ public class ContatoService {
                 .createdAt(contato.getCreatedAt())
                 .updatedAt(contato.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * Checks if a CPF is already registered for the current user
+     * 
+     * Business Rules:
+     * - Validates CPF format using official algorithm
+     * - Checks uniqueness within the authenticated user's contacts
+     * - Returns false if CPF is invalid or not registered
+     * 
+     * @param cpf the CPF to check (numbers only)
+     * @return true if CPF exists and is valid, false otherwise
+     */
+    @Transactional(readOnly = true)
+    public boolean cpfExists(String cpf) {
+        // Validate CPF format first
+        if (!CpfValidator.isValid(cpf)) {
+            return false;
+        }
+        
+        Usuario usuario = getCurrentUser();
+        return contatoRepository.existsByUsuarioIdAndCpf(usuario.getId(), cpf);
     }
 }

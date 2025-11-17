@@ -145,19 +145,13 @@ export default function ContatoForm({ open, contato, onSave, onClose }) {
     const cpfNumbers = formData.cpf.replace(/[^\d]/g, '');
     
     if (cpfNumbers.length === 11) {
-      // Validate CPF format
-      if (!validarCPF(cpfNumbers)) {
-        setErrors(prev => ({ ...prev, cpf: 'CPF inválido' }));
-        return;
-      }
-      
       // Check if CPF is already registered (skip if editing the same contact)
       if (!contato || cpfNumbers !== contato.cpf) {
         setCpfChecking(true);
         try {
-          // Try to search for contacts with this CPF
-          const response = await contatosAPI.list({ search: cpfNumbers });
-          if (response.data.content && response.data.content.length > 0) {
+          // Use dedicated backend endpoint to verify CPF
+          const response = await contatosAPI.verificarCpf(cpfNumbers);
+          if (response.data.exists) {
             setErrors(prev => ({ ...prev, cpf: 'CPF já cadastrado no sistema' }));
           }
         } catch (err) {

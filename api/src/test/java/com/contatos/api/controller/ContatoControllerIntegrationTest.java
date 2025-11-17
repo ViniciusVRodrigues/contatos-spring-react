@@ -61,11 +61,13 @@ class ContatoControllerIntegrationTest {
 
     /**
      * Test: Should require authentication for listing contacts
+     * Note: Spring Security 6 returns 403 (Forbidden) instead of 401 (Unauthorized) 
+     * when no authentication is provided
      */
     @Test
     void shouldRequireAuthenticationForListContatos() throws Exception {
         mockMvc.perform(get("/api/contatos"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     /**

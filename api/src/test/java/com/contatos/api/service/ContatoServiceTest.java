@@ -346,15 +346,16 @@ class ContatoServiceTest {
 
     /**
      * Helper method to generate valid CPF for testing
-     * Uses a simple approach to create different valid CPFs
+     * Uses pre-calculated valid CPFs that pass the official validation algorithm
      */
     private String generateValidCpf(int seed) {
-        // Pre-calculated valid CPFs for testing
-        String[] validCpfs = {
-                "12345678909",
-                "11144477735",
-                "52599927031"
-        };
-        return validCpfs[seed % validCpfs.length];
+        // Pre-calculated VALID CPFs for testing (verified with official algorithm)
+        // Each test needs unique CPFs to avoid duplicate detection
+        switch (seed) {
+            case 1: return "11144477735";  // Valid CPF
+            case 2: return "52998224725";  // Valid CPF  
+            case 3: return "84434895028";  // Valid CPF
+            default: return "11144477735";
+        }
     }
 }

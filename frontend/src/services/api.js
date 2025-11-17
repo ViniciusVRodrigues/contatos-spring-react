@@ -32,6 +32,7 @@ export const contatosAPI = {
   create: (data) => api.post('/contatos', data),
   update: (id, data) => api.put(`/contatos/${id}`, data),
   delete: (id) => api.delete(`/contatos/${id}`),
+  verificarCpf: (cpf) => api.get('/contatos/verificar-cpf', { params: { cpf } }),
 };
 
 // Enderecos API

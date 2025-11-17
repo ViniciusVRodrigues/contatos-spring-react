@@ -125,4 +125,20 @@ public class ContatoController {
         contatoService.deleteContato(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/verificar-cpf")
+    @Operation(
+        summary = "Verificar CPF",
+        description = "Verifica se um CPF já está cadastrado no sistema para o usuário autenticado"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Verificação concluída"),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado", content = @Content)
+    })
+    public ResponseEntity<java.util.Map<String, Boolean>> verificarCpf(
+            @Parameter(description = "CPF a ser verificado (somente números)")
+            @RequestParam String cpf) {
+        boolean exists = contatoService.cpfExists(cpf);
+        return ResponseEntity.ok(java.util.Map.of("exists", exists));
+    }
 }
