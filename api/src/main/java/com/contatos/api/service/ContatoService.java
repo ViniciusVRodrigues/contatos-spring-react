@@ -221,10 +221,10 @@ public class ContatoService {
         Double latitude = request.getLatitude();
         Double longitude = request.getLongitude();
         
-        // Only fetch coordinates if they're not provided or are zero
+        // Fetch new coordinates if: address changed OR coordinates not provided/zero
         boolean needsCoordinates = (latitude == null || latitude == 0.0) || (longitude == null || longitude == 0.0);
         
-        if (needsCoordinates && enderecoMudou) {
+        if (enderecoMudou || needsCoordinates) {
             try {
                 var location = googleMapsService.getCoordinates(
                     request.getLogradouro(), 

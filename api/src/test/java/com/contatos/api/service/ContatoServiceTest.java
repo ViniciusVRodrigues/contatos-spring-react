@@ -1,5 +1,6 @@
 package com.contatos.api.service;
 
+import com.contatos.api.config.TestConfig;
 import com.contatos.api.dto.ContatoRequest;
 import com.contatos.api.dto.ContatoResponse;
 import com.contatos.api.dto.UsuarioRegistroRequest;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @Transactional
+@Import(TestConfig.class)
 class ContatoServiceTest {
 
     @Autowired
